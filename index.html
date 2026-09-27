@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RaasPass - Navratri 2025 Smart Passes & Parking</title>
+    <meta name="description" content="Experience Gujarat & India's Grandest Navratri 2025. Smart ticketing, authenticated contactless RFID bands, reserved parking, and interactive arena navigation." />
+    <meta property="og:title" content="RaasPass - Navratri 2025 Smart Passes & Parking" />
+    <meta property="og:description" content="Experience Gujarat & India's Grandest Navratri 2025. Smart ticketing, authenticated contactless RFID bands, reserved parking, and interactive arena navigation." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+    <script>
+      // Global guard to safely intercept Google Maps API activation errors and prevent unhandled browser exceptions
+      window.__gmAuthFailed = false;
+      window.gm_authFailure = function() {
+        window.__gmAuthFailed = true;
+        window.dispatchEvent(new CustomEvent('google-maps-auth-failure'));
+      };
+      const origConsoleError = console.error;
+      console.error = function(...args) {
+        if (args.some(arg => typeof arg === 'string' && (arg.includes('ApiNotActivatedMapError') || arg.includes('google.maps')))) {
+          return;
+        }
+        origConsoleError.apply(console, args);
+      };
+      window.addEventListener('error', function(e) {
+        if (e && (
+          (e.message && (
+            e.message.indexOf('Illegal constructor') !== -1 ||
+            e.message.indexOf('ApiNotActivatedMapError') !== -1 ||
+            e.message.indexOf('google.maps') !== -1
+          )) ||
+          (e.filename && e.filename.indexOf('maps.googleapis.com') !== -1)
+        )) {
+          e.preventDefault && e.preventDefault();
+          e.stopImmediatePropagation && e.stopImmediatePropagation();
+          return true;
+        }
+      }, true);
+    </script>
+  </head>
+  <body class="bg-[#121317] text-[#e3e2e7] antialiased selection:bg-[#ffa000] selection:text-black">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

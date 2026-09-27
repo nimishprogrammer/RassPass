@@ -1,0 +1,8 @@
+{
+  "name": "RaasPass - Navratri 2025 Smart Passes & Parking",
+  "description": "Experience Gujarat & India's Grandest Navratri 2025. Smart ticketing, authenticated contactless RFID bands, reserved parking, and interactive arena navigation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

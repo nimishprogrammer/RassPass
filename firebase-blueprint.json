@@ -1,0 +1,83 @@
+{
+  "entities": {
+    "Venue": {
+      "title": "Venue",
+      "description": "Ahmedabad Garba ground or arena with location and capacity details",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Name of the ground" },
+        "area": { "type": "string", "description": "Locality or corridor in Ahmedabad" },
+        "location": { "type": "string", "description": "Street address" },
+        "lat": { "type": "number", "description": "Latitude" },
+        "lng": { "type": "number", "description": "Longitude" },
+        "groundCap": { "type": "string", "description": "Dancer capacity" },
+        "price": { "type": "number", "description": "Base entry pass price" },
+        "isFree": { "type": "boolean", "description": "Whether admission is free" },
+        "authorId": { "type": "string", "description": "Organizer or Author user ID" }
+      },
+      "required": ["title", "area", "location", "lat", "lng", "price"]
+    },
+    "Pass": {
+      "title": "Pass",
+      "description": "Authenticated Garba M-Pass and FASTag booking",
+      "type": "object",
+      "properties": {
+        "mPassRef": { "type": "string", "description": "Unique cryptographic ticket reference" },
+        "guestName": { "type": "string", "description": "Guest or attendee full name" },
+        "eventId": { "type": "string", "description": "Referenced ground event ID" },
+        "selectedNight": { "type": "string", "description": "Festival night date" },
+        "withParking": { "type": "boolean", "description": "Whether smart parking is bundled" },
+        "licensePlate": { "type": "string", "description": "FASTag vehicle plate number" },
+        "isPaid": { "type": "boolean", "description": "Verification status" },
+        "isGuest": { "type": "boolean", "description": "Whether created in login-free guest mode" }
+      },
+      "required": ["mPassRef", "guestName", "eventId", "selectedNight"]
+    },
+    "GateTelemetry": {
+      "title": "GateTelemetry",
+      "description": "Real-time gate and RFID boom barrier entry status",
+      "type": "object",
+      "properties": {
+        "gateId": { "type": "string", "description": "Identifier of the entrance gate" },
+        "name": { "type": "string", "description": "Display name of the gate" },
+        "entriesCount": { "type": "number", "description": "Current checked-in attendees count" },
+        "capacityLimit": { "type": "number", "description": "Gate throughput threshold" },
+        "fastagBoomActive": { "type": "boolean", "description": "Whether automated RFID barrier is armed" },
+        "status": { "type": "string", "description": "Flow status (smooth, moderate, surging)" }
+      },
+      "required": ["gateId", "entriesCount", "capacityLimit", "status"]
+    },
+    "Announcement": {
+      "title": "Announcement",
+      "description": "Live stage broadcast bulletins issued by ground organizers",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Announcement headline" },
+        "content": { "type": "string", "description": "Detailed broadcast message" },
+        "venueId": { "type": "string", "description": "Venue origin ID" },
+        "priority": { "type": "string", "description": "Priority level" },
+        "timestamp": { "type": "string", "description": "Time broadcast was published" },
+        "authorName": { "type": "string", "description": "Name of issuing authority" }
+      },
+      "required": ["title", "content", "priority", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/venues/{venueId}": {
+      "schema": "Venue",
+      "description": "Public garba venue listings published by authors"
+    },
+    "/passes/{passId}": {
+      "schema": "Pass",
+      "description": "Issued attendee tickets and guest M-passes"
+    },
+    "/telemetry/{gateId}": {
+      "schema": "GateTelemetry",
+      "description": "Live turnstile and boom barrier counters"
+    },
+    "/announcements/{announcementId}": {
+      "schema": "Announcement",
+      "description": "Live Navratri announcements"
+    }
+  }
+}
