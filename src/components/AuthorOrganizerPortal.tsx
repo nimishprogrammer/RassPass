@@ -180,9 +180,9 @@ export const AuthorOrganizerPortal: React.FC<AuthorOrganizerPortalProps> = ({
                 Turnstiles Live
               </span>
             </div>
-            <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight font-display mt-0.5">
-              Ahmedabad Garba Management Portal
-            </h2>
+            <h1 id="page-heading" tabIndex={-1} className="text-xl sm:text-2xl font-black text-white tracking-tight font-display mt-0.5 focus:outline-none">
+              Gujarat Fairground &amp; Ground Operations Hub
+            </h1>
           </div>
         </div>
 

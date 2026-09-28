@@ -92,24 +92,24 @@ export const SmartParkingView: React.FC<SmartParkingViewProps> = ({
       {/* Main Title & Live Bay Gauge Header */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-2 border-b border-[#24252f]">
         <div>
-          <h1 className="text-3xl sm:text-5xl font-black text-white font-display tracking-tight leading-tight">
-            Reserve Vehicle Slot at Navlakhi Ground
+          <h1 id="page-heading" tabIndex={-1} className="text-3xl sm:text-5xl font-black text-white font-display tracking-tight leading-tight focus:outline-none">
+            Reserve Vehicle Slot at {bookingState.venueName ? bookingState.venueName.split(',')[0] : 'Navlakhi Ground'}
           </h1>
 
           <div className="flex flex-wrap items-center gap-4 text-xs text-stone-300 mt-2">
             <div className="flex items-center gap-1.5">
               <MapPin className="w-4 h-4 text-[#ffa000]" />
-              <span>Navlakhi Ground, Vadodara</span>
+              <span>{bookingState.venueName || 'Navlakhi Ground, Vadodara'}</span>
             </div>
             <span>•</span>
             <div className="flex items-center gap-1.5 text-[#00e3fd]">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>United Way Navratri (Night 4 – Shasti Special)</span>
+              <span>{bookingState.eventName || 'United Way Navratri'} ({bookingState.selectedNight})</span>
             </div>
             <span>•</span>
             <div className="flex items-center gap-1.5 text-stone-300">
               <Calendar className="w-4 h-4 text-[#ffc788]" />
-              <span>Friday, Oct 6</span>
+              <span>{bookingState.eventDate}</span>
             </div>
           </div>
         </div>

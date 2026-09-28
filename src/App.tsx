@@ -3,246 +3,110 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
-import { ViewMode, PassTier, BookingState, UserProfile } from './types';
-import { INITIAL_PASS_TIERS } from './data/mockData';
+import React, { Suspense } from 'react';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'motion/react';
+import { AppProvider } from './context/AppContext';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
-import { ExploreEventsView } from './components/ExploreEventsView';
-import { EventDetailView } from './components/EventDetailView';
-import { SmartParkingView } from './components/SmartParkingView';
-import { CheckoutMPassView } from './components/CheckoutMPassView';
-import { AuthorOrganizerPortal } from './components/AuthorOrganizerPortal';
+import { MobileTabBar } from './components/MobileTabBar';
+import { SearchModal } from './components/SearchModal';
+import { Toast } from './components/Toast';
 import { GarbaMotionBeatPlayer } from './components/GarbaMotionBeatPlayer';
-import { Search, X, MapPin } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 
-export default function App() {
-  const [currentView, setCurrentView] = useState<ViewMode>('explore');
-  const [selectedCity, setSelectedCity] = useState('Ahmedabad');
-  const [searchModalOpen, setSearchModalOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+// Code-split dynamic page imports for optimal Core Web Vitals & instantaneous navigation
+const HomePage = React.lazy(() => import('./pages/HomePage').then((m) => ({ default: m.HomePage })));
+const EventDetailPage = React.lazy(() => import('./pages/EventDetailPage').then((m) => ({ default: m.EventDetailPage })));
+const SmartParkingPage = React.lazy(() => import('./pages/SmartParkingPage').then((m) => ({ default: m.SmartParkingPage })));
+const PassesWalletPage = React.lazy(() => import('./pages/PassesWalletPage').then((m) => ({ default: m.PassesWalletPage })));
+const LineupPage = React.lazy(() => import('./pages/LineupPage').then((m) => ({ default: m.LineupPage })));
+const SchedulePage = React.lazy(() => import('./pages/SchedulePage').then((m) => ({ default: m.SchedulePage })));
+const LiveArenaGatesPage = React.lazy(() => import('./pages/LiveArenaGatesPage').then((m) => ({ default: m.LiveArenaGatesPage })));
+const OrganizerPage = React.lazy(() => import('./pages/OrganizerPage').then((m) => ({ default: m.OrganizerPage })));
+const FaqGuidelinesPage = React.lazy(() => import('./pages/FaqGuidelinesPage').then((m) => ({ default: m.FaqGuidelinesPage })));
+const NotFoundPage = React.lazy(() => import('./pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
 
-  // Login-Free Guest User Profile State
-  const [userProfile, setUserProfile] = useState<UserProfile>(() => {
-    try {
-      const saved = localStorage.getItem('rp_user_profile');
-      if (saved) return JSON.parse(saved);
-    } catch (_) {
-      // Fallback
-    }
-    return {
-      id: 'guest-' + Math.random().toString(36).slice(2, 9),
-      name: 'Priya Sharma (Guest)',
-      role: 'guest',
-      isGuest: true,
-      fastagPlate: 'GJ-06-AB-4092',
-      savedPassesCount: 1,
-      lastLoginMethod: 'guest_instant',
-    };
-  });
+function PageLoadingFallback() {
+  return (
+    <div className="flex-1 min-h-[50vh] flex flex-col items-center justify-center p-8 space-y-3" role="status" aria-label="Loading page">
+      <div className="relative w-10 h-10 flex items-center justify-center">
+        <div className="w-10 h-10 rounded-full border-2 border-stone-800 border-t-[#ffa000] animate-spin" />
+        <Sparkles className="w-4 h-4 text-[#ffa000] absolute" aria-hidden="true" />
+      </div>
+      <p className="text-xs text-stone-400 font-medium tracking-wide">
+        Connecting to Gujarat fairground...
+      </p>
+    </div>
+  );
+}
 
-  // Pass tiers state
-  const [tiers, setTiers] = useState<PassTier[]>(INITIAL_PASS_TIERS);
-
-  // Booking state across the flow
-  const [bookingState, setBookingState] = useState<BookingState>({
-    eventId: 'united-way',
-    eventName: 'United Way of Baroda Navratri Mahotsav 2025',
-    venueName: 'Navlakhi Ground, Rajmahal Road',
-    city: 'Ahmedabad',
-    eventDate: 'Oct 11 – Oct 19, 2025',
-    selectedNight: 'Night 4 • Friday, Oct 6',
-    passes: { 'season-pass': 1 },
-    withParking: true,
-    parkingCategory: '4w',
-    parkingZone: 'zone-b',
-    parkingArrivalWindow: '6:30 PM – 8:00 PM',
-    licensePlate: 'GJ-06-AB-4092',
-    driverPhone: '+91 98765 43210',
-    autoBoomEnabled: true,
-    expressValet: false,
-    evCharging: false,
-    appliedPromo: 'GARBA20',
-    promoDiscount: 479.60,
-    paymentMethod: 'upi',
-    vpaAddress: 'priyasharma@okaxis',
-    isPaid: false,
-    guestName: 'Priya Sharma',
-    mPassRef: '#RP-2025-VAD-88492',
-  });
-
-  // Sync profile to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem('rp_user_profile', JSON.stringify(userProfile));
-    } catch (_) {
-      // Ignore
-    }
-  }, [userProfile]);
-
-  const handleUpdateProfile = (updates: Partial<UserProfile>) => {
-    setUserProfile((prev) => {
-      const next = { ...prev, ...updates };
-      if (updates.name) {
-        setBookingState((b) => ({ ...b, guestName: updates.name! }));
-      }
-      if (updates.fastagPlate) {
-        setBookingState((b) => ({ ...b, licensePlate: updates.fastagPlate! }));
-      }
-      return next;
-    });
-  };
-
-  const totalPassCount = tiers.reduce((sum, t) => sum + t.quantity, 0);
-
-  const handleUpdateTierQuantity = (tierId: string, delta: number) => {
-    setTiers((prev) =>
-      prev.map((t) => {
-        if (t.id === tierId) {
-          const newQty = Math.max(0, t.quantity + delta);
-          return { ...t, quantity: newQty };
-        }
-        return t;
-      })
-    );
-  };
-
-  const handleUpdateBooking = (updates: Partial<BookingState>) => {
-    setBookingState((prev) => ({ ...prev, ...updates }));
-  };
-
-  const handleNavigate = (view: ViewMode) => {
-    setCurrentView(view);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+function AnimatedAppRoutes() {
+  const location = useLocation();
 
   return (
-    <div className="min-h-screen bg-[#121317] text-[#e3e2e7] flex flex-col font-sans selection:bg-[#ffa000] selection:text-black">
-      {/* Top Global Navigation Bar */}
-      <Navbar
-        currentView={currentView}
-        onNavigate={handleNavigate}
-        selectedCity={selectedCity}
-        onSelectCity={(city) => setSelectedCity(city)}
-        onOpenMyPasses={() => handleNavigate('checkout-mpass')}
-        onOpenSearch={() => setSearchModalOpen(true)}
-        totalPassesCount={totalPassCount}
-        userProfile={userProfile}
-        onUpdateProfile={handleUpdateProfile}
-      />
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={location.pathname}
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -6 }}
+        transition={{ duration: 0.16, ease: 'easeOut' }}
+        className="flex-1 flex flex-col"
+      >
+        <Suspense fallback={<PageLoadingFallback />}>
+          <Routes location={location}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/events" element={<HomePage />} />
+            <Route path="/events/:eventId" element={<EventDetailPage />} />
+            <Route path="/parking" element={<SmartParkingPage />} />
+            <Route path="/passes" element={<PassesWalletPage />} />
+            <Route path="/checkout-mpass" element={<PassesWalletPage />} />
+            <Route path="/lineup" element={<LineupPage />} />
+            <Route path="/artists" element={<LineupPage />} />
+            <Route path="/schedule" element={<SchedulePage />} />
+            <Route path="/gates" element={<LiveArenaGatesPage />} />
+            <Route path="/organizer" element={<OrganizerPage />} />
+            <Route path="/author-portal" element={<OrganizerPage />} />
+            <Route path="/faq" element={<FaqGuidelinesPage />} />
+            <Route path="/guidelines" element={<FaqGuidelinesPage />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </Suspense>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
 
-      {/* Main Dynamic View Content */}
-      <main className="flex-1">
-        {currentView === 'explore' && (
-          <ExploreEventsView
-            onSelectEvent={(eventId) => {
-              handleUpdateBooking({ eventId });
-              handleNavigate('event-detail');
-            }}
-            onGoToParking={() => handleNavigate('parking')}
-            selectedCity={selectedCity}
-          />
-        )}
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppProvider>
+        <div className="min-h-screen bg-[#121317] text-[#e3e2e7] flex flex-col font-sans selection:bg-[#ffa000] selection:text-black antialiased relative">
+          {/* Top Global Navigation Bar */}
+          <Navbar />
 
-        {currentView === 'event-detail' && (
-          <EventDetailView
-            tiers={tiers}
-            onUpdateTierQuantity={handleUpdateTierQuantity}
-            bookingState={bookingState}
-            onUpdateBooking={handleUpdateBooking}
-            onProceedToCheckout={() => handleNavigate('checkout-mpass')}
-            onNavigateToParking={() => handleNavigate('parking')}
-          />
-        )}
+          {/* Main Dynamic Multi-Page Router View */}
+          <main id="main-content" className="flex-1 flex flex-col pb-16 md:pb-0 focus:outline-none">
+            <AnimatedAppRoutes />
+          </main>
 
-        {currentView === 'parking' && (
-          <SmartParkingView
-            bookingState={bookingState}
-            onUpdateBooking={handleUpdateBooking}
-            onProceedToCheckout={() => handleNavigate('checkout-mpass')}
-            onBackToPasses={() => handleNavigate('event-detail')}
-          />
-        )}
+          {/* Global Real-Time Garba Beat Synthesizer & Dandiya Motion Player */}
+          <GarbaMotionBeatPlayer />
 
-        {currentView === 'checkout-mpass' && (
-          <CheckoutMPassView
-            bookingState={bookingState}
-            onUpdateBooking={handleUpdateBooking}
-            onPaymentSuccess={() => {
-              handleUpdateBooking({ isPaid: true });
-              alert('🎉 Payment verified! Your authenticated M-Pass & Smart Boom QR are active in your Guest session.');
-            }}
-            onReturnToHome={() => handleNavigate('explore')}
-          />
-        )}
+          {/* Global Quick Search Modal */}
+          <SearchModal />
 
-        {currentView === 'author-portal' && (
-          <AuthorOrganizerPortal
-            onReturnToExplore={() => handleNavigate('explore')}
-          />
-        )}
-      </main>
+          {/* Global Toast Notifications */}
+          <Toast />
 
-      {/* Global Real-Time Garba Beat Synthesizer & Dandiya Motion Player */}
-      <GarbaMotionBeatPlayer />
+          {/* Mobile Bottom Navigation Bar */}
+          <MobileTabBar />
 
-      {/* Global Quick Search Modal */}
-      {searchModalOpen && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-start justify-center pt-20 px-4">
-          <div className="bg-[#17181f] border border-[#2e2f3a] rounded-2xl p-5 max-w-xl w-full shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-[#252631]">
-              <div className="flex items-center gap-2 flex-1">
-                <Search className="w-5 h-5 text-[#ffa000]" />
-                <input
-                  type="text"
-                  placeholder="Search Ahmedabad grounds, artists, S.G. Highway, GMDC..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  autoFocus
-                  className="w-full bg-transparent text-sm text-white placeholder:text-stone-500 focus:outline-none"
-                />
-              </div>
-              <button
-                onClick={() => setSearchModalOpen(false)}
-                className="p-1 rounded-lg text-stone-400 hover:text-white"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="space-y-2 text-xs">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-stone-500">
-                Popular Ahmedabad Searches
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  'GMDC Ground Carnival',
-                  'S.G. Highway Garba',
-                  'Kinjal Dave Live',
-                  'Mandvi Ni Pol Barefoot',
-                  'Sindhu Bhavan Lawns',
-                  'Sabarmati Riverfront',
-                ].map((tag) => (
-                  <button
-                    key={tag}
-                    onClick={() => {
-                      setSearchModalOpen(false);
-                      handleNavigate('explore');
-                    }}
-                    className="px-3 py-1.5 rounded-lg bg-[#22232c] hover:bg-[#2d2e3a] text-stone-200 transition-colors flex items-center gap-1.5"
-                  >
-                    <MapPin className="w-3 h-3 text-[#ffa000]" />
-                    <span>{tag}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
+          {/* Global Footer */}
+          <Footer />
         </div>
-      )}
-
-      {/* Global Footer */}
-      <Footer />
-    </div>
+      </AppProvider>
+    </BrowserRouter>
   );
 }
