@@ -134,3 +134,36 @@ export interface BookingState {
   guestName: string;
   mPassRef: string;
 }
+
+export interface FestivalScheduleNight {
+  nightNumber: number;
+  title: string;
+  date: string;
+  dayOfWeek: string;
+  deity: string;
+  colorName: string;
+  colorHex: string;
+  colorBgClass: string;
+  dressGuideline: string;
+  traditionalAartiTime: string;
+  megaRaasRounds: string;
+  highlights: string[];
+  recommendedVenues: { id: string; name: string; city: string }[];
+}
+
+export interface FaqItem {
+  id: string;
+  category: 'passes' | 'parking' | 'etiquette' | 'safety' | 'venue';
+  question: string;
+  answer: string;
+}
+
+export interface ArtistProfile extends Headliner {
+  bio: string;
+  genre: string;
+  notableTracks: string[];
+  performanceNights: string;
+  venueId: string;
+  venueName: string;
+}
+

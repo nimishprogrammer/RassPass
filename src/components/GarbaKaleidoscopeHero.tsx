@@ -85,7 +85,7 @@ export const GarbaKaleidoscopeHero: React.FC<GarbaKaleidoscopeHeroProps> = ({
             </span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight font-display leading-[1.12]">
+          <h1 id="page-heading" tabIndex={-1} className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight font-display leading-[1.12] focus:outline-none">
             Iconic Garba Songs,{' '}
             <span className="bg-gradient-to-r from-[#ffa000] via-[#ffc788] to-[#00e3fd] bg-clip-text text-transparent drop-shadow-sm">
               Swirling Raas

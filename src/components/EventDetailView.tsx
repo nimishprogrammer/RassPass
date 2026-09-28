@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { PassTier, BookingState } from '../types';
 import { InteractiveMap } from './InteractiveMap';
-import { PROMO_CODES } from '../data/mockData';
+import { PROMO_CODES, GROUND_EVENTS, ARTIST_PROFILES } from '../data/mockData';
 
 interface EventDetailViewProps {
   tiers: PassTier[];
@@ -41,6 +41,10 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({
   const [voucherInput, setVoucherInput] = useState('');
   const [voucherError, setVoucherError] = useState('');
   const [voucherSuccess, setVoucherSuccess] = useState('');
+
+  // Dynamically resolve event and featured artist
+  const currentEvent = GROUND_EVENTS.find((e) => e.id === bookingState.eventId) || GROUND_EVENTS[0];
+  const matchedArtist = ARTIST_PROFILES.find((a) => a.venueId === currentEvent.id || currentEvent.title.toLowerCase().includes(a.name.split(' ')[0].toLowerCase())) || ARTIST_PROFILES[2];
 
   // Calculate pricing
   const passesSubtotal = tiers.reduce((sum, tier) => sum + tier.price * tier.quantity, 0);
@@ -85,20 +89,20 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
-      {/* Breadcrumb & Official Partner Bar */}
+      {/* Official Partner Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-stone-400">
         <div className="flex items-center gap-2">
-          <span>Gujarat</span>
+          <span>{currentEvent.city || 'Gujarat'}</span>
           <ChevronRight className="w-3 h-3 text-stone-600" />
-          <span>Ahmedabad / Vadodara Metro Link</span>
+          <span>{currentEvent.area}</span>
           <ChevronRight className="w-3 h-3 text-stone-600" />
-          <span className="text-stone-200 font-medium">United Way Garba 2025</span>
+          <span className="text-stone-200 font-medium">{currentEvent.title}</span>
         </div>
 
         <div className="flex items-center gap-2">
           <span className="flex items-center gap-1 text-[11px] font-bold text-[#ff4d4f] bg-[#2d1217] px-2.5 py-1 rounded-full border border-[#ff4d4f]/30">
             <span className="w-1.5 h-1.5 rounded-full bg-[#ff4d4f] animate-ping"></span>
-            SELLING OUT RAPIDLY
+            {currentEvent.slotsLeftBadge || 'SELLING OUT RAPIDLY'}
           </span>
           <span className="flex items-center gap-1 text-[11px] font-bold text-[#00e3fd] bg-[#0c242c] px-2.5 py-1 rounded-full border border-[#00e3fd]/30">
             <ShieldCheck className="w-3.5 h-3.5" />
@@ -113,34 +117,38 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({
         <div className="lg:col-span-7 space-y-4">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#271d0e] border border-[#ffa000]/40 text-[#ffa000] text-xs font-semibold">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Authentic Traditional Garba (World's Largest Garba Circle - 40,000+ Dancers)</span>
+            <span>{currentEvent.tag} • {currentEvent.category.toUpperCase()} GARBA</span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-black text-white font-display tracking-tight leading-tight">
-            United Way of Baroda Navratri Mahotsav <span className="text-[#ffa000]">2025</span>
+          <h1 id="page-heading" tabIndex={-1} className="text-3xl sm:text-5xl font-black text-white font-display tracking-tight leading-tight focus:outline-none">
+            {currentEvent.title}
           </h1>
 
           <div className="flex flex-wrap items-center gap-4 text-xs text-stone-300 pt-1">
             <div className="flex items-center gap-1.5">
-              <MapPin className="w-4 h-4 text-[#ffa000]" />
-              <span>Navlakhi Ground, Rajmahal Road, Vadodara (Express Shuttle from Nehrunagar, Ahmedabad)</span>
+              <MapPin className="w-4 h-4 text-[#ffa000] shrink-0" />
+              <span>{currentEvent.location}</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <Calendar className="w-4 h-4 text-[#00e3fd]" />
-              <span>Oct 11 – Oct 19, 2025 (All 9 Nights)</span>
+              <Calendar className="w-4 h-4 text-[#00e3fd] shrink-0" />
+              <span>Oct 3 – Oct 11, 2025 (All 9 Nights Season)</span>
             </div>
           </div>
 
           {/* 3 Metric Badges */}
           <div className="grid grid-cols-3 gap-3 pt-3">
             <div className="bg-[#17181f] border border-[#2a2b35] p-3 rounded-xl">
-              <div className="text-lg sm:text-xl font-black text-[#ffa000] font-display">40,000+</div>
-              <div className="text-[11px] text-stone-400">Simultaneous Revelers</div>
+              <div className="text-lg sm:text-xl font-black text-[#ffa000] font-display">
+                {currentEvent.groundCap.split('•')[0].replace('Capacity: ', '').replace('Area: ', '')}
+              </div>
+              <div className="text-[11px] text-stone-400">Ground Capacity</div>
             </div>
 
             <div className="bg-[#17181f] border border-[#2a2b35] p-3 rounded-xl">
-              <div className="text-lg sm:text-xl font-black text-[#00e3fd] font-display">360° Round</div>
-              <div className="text-[11px] text-stone-400">Center Stage Deck</div>
+              <div className="text-lg sm:text-xl font-black text-[#00e3fd] font-display">
+                {currentEvent.isFree ? 'Free Pass' : `₹${currentEvent.price}`}
+              </div>
+              <div className="text-[11px] text-stone-400">{currentEvent.priceUnit}</div>
             </div>
 
             <div className="bg-[#17181f] border border-[#2a2b35] p-3 rounded-xl">
@@ -155,30 +163,27 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({
           <div className="flex items-start gap-4">
             <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-[#24252f] shrink-0 border border-[#ffa000]/40 shadow-lg">
               <img
-                src="https://images.unsplash.com/photo-1465847899084-d164df4dedc6?auto=format&fit=crop&w=300&q=80"
-                alt="Atul Purohit"
+                src={matchedArtist.image || currentEvent.image}
+                alt={matchedArtist.name}
                 className="w-full h-full object-cover"
-                onError={(e) => {
-                  (e.target as HTMLElement).style.display = 'none';
-                }}
               />
             </div>
 
             <div className="space-y-1">
               <div className="text-[10px] uppercase font-bold tracking-wider text-[#ffa000]">
-                HEADLINER & LEAD MAESTRO
+                HEADLINER & LEAD ARTIST
               </div>
-              <h2 className="text-lg sm:text-xl font-black text-white">Atul Purohit</h2>
-              <div className="text-xs text-stone-400 font-medium">& The United Way Orchestra</div>
+              <h2 className="text-lg sm:text-xl font-black text-white">{matchedArtist.name}</h2>
+              <div className="text-xs text-stone-400 font-medium">{matchedArtist.subtitle}</div>
               <div className="flex items-center gap-1 text-[11px] text-[#ffa000] font-semibold pt-1">
                 <span>★</span>
-                <span>Living Garba Legend • 32 Years at Navlakhi</span>
+                <span>{matchedArtist.rating || '4.9 (20k+ reviews)'}</span>
               </div>
             </div>
           </div>
 
           <p className="text-xs text-stone-300 mt-4 leading-relaxed line-clamp-3">
-            Known for divine renditions of <strong className="text-white">"Tara Vina Shyam"</strong> and electrifying 3-tali folk compositions that set the world's most disciplined garba rhythm year after year.
+            {matchedArtist.bio}
           </p>
 
           <div className="mt-4 pt-3 border-t border-[#252631] space-y-1.5 text-xs text-stone-300">
@@ -195,11 +200,12 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({
                 <span>👘</span>
                 Mandatory Dress:
               </span>
-              <span className="font-semibold text-white">Chaniya Choli / Kurta Kedia</span>
+              <span className="font-semibold text-white">Traditional Chaniya Choli / Kediyu</span>
             </div>
           </div>
         </div>
       </div>
+
 
       {/* Main Booking Grid: Left Tiers + Right Booking Summary */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-4">

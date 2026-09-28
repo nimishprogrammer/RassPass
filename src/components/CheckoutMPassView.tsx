@@ -85,11 +85,11 @@ export const CheckoutMPassView: React.FC<CheckoutMPassViewProps> = ({
       {/* Top Stepper & Reservation Expiry Indicator */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
         <div className="flex items-center gap-2">
-          <span className="px-2.5 py-0.5 rounded bg-[#ffa000] text-black font-extrabold uppercase text-[10px]">
-            STEP 3 OF 3
+          <span className="px-2.5 py-0.5 rounded bg-[#ffa000] text-black font-extrabold uppercase text-[10px] font-label">
+            VERIFIED M-PASS
           </span>
-          <h1 className="text-sm sm:text-base font-bold text-white">
-            Unified Booking Verification & Instant M-Pass
+          <h1 id="page-heading" tabIndex={-1} className="text-xl sm:text-2xl font-black text-white font-display focus:outline-none">
+            Unified Booking Verification &amp; Instant M-Pass
           </h1>
         </div>
 
